@@ -1,2 +1,4 @@
-package com.company;public class WordIndexOutOfBoundsException {
+package com.company;
+
+public class WordIndexOutOfBoundsException extends Exception{
 }
