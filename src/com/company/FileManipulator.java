@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Scanner;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FileManipulator {
@@ -83,13 +84,8 @@ public class FileManipulator {
         //Swapping the lines
         Collections.swap(fileContents, line1, line2);
 
-        //Building the final String with endlines
-        StringBuilder finalFileContent = new StringBuilder();
-        for(int currentLine = 0; currentLine < fileContents.size(); currentLine++) {
-            finalFileContent.append(fileContents.get(currentLine) + "\n");
-        }
-
-        writeToFile(finalFileContent.toString());
+        //Writing to the file
+        writeToFile(fileContents);
 
         //OLD VERSION OF THE CODE
         /*
@@ -149,46 +145,57 @@ public class FileManipulator {
         */
     }
 
-    public void switchWords(int line1, int line1WordIndex, int line2, int line2WordIndex) throws LineOutOfBoundsException, WordIndexOutOfBoundsException, IOException{
+    public void switchWords(int line1, int line1Position, int line2, int line2Position) throws ArrayIndexOutOfBoundsException, IOException{
+        //So arrays are synchronized
+        line1--;
+        line2--;
 
-        //Validation
-        if(line1 <=0) { throw new LineOutOfBoundsException(); }
-        if (line1WordIndex <= 0 || line2WordIndex <=0) { throw new WordIndexOutOfBoundsException(); }
-
-        //Temporarily store words
-        String word1 = getTokenByIndex(line1, line1WordIndex);
-        String word2 = getTokenByIndex(line2, line2WordIndex);
-
-        //Temporarily store file contents in a dynamic array
-        StringBuilder fileContent = new StringBuilder();
-
-        int currentLine = 1;
-        int currentToken = 1;
-
+        ArrayList<String> fileContent = new ArrayList<String>();
         fileScanner = resetFileScanner(fileScanner);
 
-        while(fileScanner.hasNextLine()){
-            if(currentLine == line1) {
-                while(fileScanner.hasNext()) {
-                    if(currentToken == line1WordIndex) {
-                        fileContent.append(word2);
-                    }
-                    else{
-                        String temp = fileScanner.next();
-                        if(temp.equals("\n")) {
-                            currentToken = 1;
-                            break;
-                        }
-                        else {
-                            fileContent.append(temp);
-                        }
-                    }
-                }
-            }
+        //TODO replace with fileReader
+        while(fileScanner.hasNextLine()) {
+            fileContent.add(fileScanner.nextLine());
         }
 
+        //Validation
+        if(fileContent.size() <= line2) { throw new ArrayIndexOutOfBoundsException("File doesn't have needed  lines!");}
+
+        // stores value for the beginning and end of the words for the selected string
+        int word1IndexArray[] = getTokenStartEndIndex(fileContent.get(line1), line1Position);
+        int word2IndexArray[] = getTokenStartEndIndex(fileContent.get(line2), line2Position);
+
+        //Temp variable to store the word from line1 before we switch it with the word from line2
+        String word1String = fileContent.get(line1).substring(word1IndexArray[0], word1IndexArray[1]);
+
+        fileContent.set(line1, (fileContent.get(line1).substring(0, word1IndexArray[0]) //beginning of the line up until word1
+                + fileContent.get(line2).substring(word2IndexArray[0], word2IndexArray[1]) //placing word2 in the place of word1
+                + fileContent.get(line1).substring(word1IndexArray[1]))); //placing the other part of the line
+
+        fileContent.set(line2, (fileContent.get(line2).substring(0, word2IndexArray[0]) //beginning of the line up until word2
+                + word1String //placing word1 in the place of word2
+                + fileContent.get(line2).substring(word2IndexArray[1]))); //placing the other part of the line
+
+        writeToFile(fileContent);
     }
 
+    private int[] getTokenStartEndIndex(String testedString, int wordPosition) throws ArrayIndexOutOfBoundsException{
+        Pattern pattern = Pattern.compile("\\w+");
+        Matcher matcher = pattern.matcher(testedString);
+
+        //We go through the string, searching for the index
+        for(int currentPosition = 1; currentPosition <= wordPosition; currentPosition++) {
+            if(!matcher.find()) {
+                throw new ArrayIndexOutOfBoundsException("Word out of bounds!");
+            }
+            if(currentPosition == wordPosition) {
+                return new int[] {matcher.start(), matcher.end()};
+            }
+        }
+        return null; //keeping this, because compiler isnt happy about not having a return statement. It's unreachable pratically
+    }
+
+    /*
     //Pretty unoptimized method, but it works
     private String getTokenByIndex(int lineNum, int tokenIndex) throws IOException, LineOutOfBoundsException, WordIndexOutOfBoundsException{
         //needed to use the scanner
@@ -220,11 +227,24 @@ public class FileManipulator {
 
         return fileScanner.next();
     }
+    */
 
     //Will open a writer, write to the file and close the writer
-    public void writeToFile(String content) throws IOException{
+    private void writeToFile(String content) throws IOException{
         FileWriter fileWriter = new FileWriter(this.file);
         fileWriter.append(content);
+        fileWriter.close();
+    }
+
+    private void writeToFile(ArrayList<String> listToPrint) throws IOException{
+        StringBuilder tempList = new StringBuilder();
+        for(int currentLine = 0; currentLine < listToPrint.size(); currentLine++) {
+            tempList.append(listToPrint.get(currentLine));
+            tempList.append('\n');
+        }
+
+        FileWriter fileWriter = new FileWriter(this.file);
+        fileWriter.append(tempList);
         fileWriter.close();
     }
 
