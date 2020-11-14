@@ -11,17 +11,13 @@ import java.util.regex.Pattern;
 
 public class FileManipulator {
 
-    //Maximum chars that can be read with the buffered reader
-    final int READ_AHEAD_LIMIT = 2048;
-
+    final int READ_AHEAD_LIMIT = 2048;//Maximum chars that can be read with the buffered reader
     File file;//current file
-
-    BufferedReader fileReader; //Reader for the file
-
+    //BufferedReader fileReader; //Reader for the file
     String currentDirectory; //Always verified due to setDirectory() validation
+    ArrayList<String> fileContent; //File content stored here, manipulated here, until
 
-    public FileManipulator() throws IOException{
-
+    public FileManipulator(){
         //load default directory
         this.currentDirectory = System.getProperty("user.dir");
         this.currentDirectory += "\\test.txt";
@@ -59,13 +55,22 @@ public class FileManipulator {
             }
         }
 
+        /*
         //After we are sure a file exists in this directory, we init the fileReader
+        if(this.fileReader != null) {
+            this.fileReader.close();
+        }
         this.fileReader = new BufferedReader(new FileReader(this.file));
         this.fileReader.mark(READ_AHEAD_LIMIT);
+         */
     }
 
     //Currently, a bit unoptimized
     public void switchLines(int line1, int line2) throws ArrayIndexOutOfBoundsException, IOException {
+
+        //Making the input synchronized with the array lines
+        line1--;
+        line2--;
 
         //making sure line2 is the higher number
         if(line1 > line2) {
@@ -74,8 +79,8 @@ public class FileManipulator {
             line1 -= line2;
         }
 
-        if(line1 <=0) {
-            throw new ArrayIndexOutOfBoundsException("Line num lower than 0!");
+        if(line1 <0) {
+            throw new ArrayIndexOutOfBoundsException("Line num lower than 1!");
         }
 
         // Temporary storage of the file contents
@@ -151,6 +156,18 @@ public class FileManipulator {
         return null; //keeping this, because compiler isn't happy about not having a return statement. It's unreachable pratically
     }
 
+    private void updateFileContentsArray() throws IOException {
+        BufferedReader fileReader = new BufferedReader(new FileReader(this.file));
+
+        this.fileContent = new ArrayList<>();
+        String temp;
+        while((temp = fileReader.readLine()) !=null ) {
+            this.fileContent.add(temp + '\n');
+        }
+
+        fileReader.close();
+    }
+
     //Will open a writer, write to the file and close the writer
     private void writeToFile(ArrayList<String> listToPrint) throws IOException{
         StringBuilder tempList = new StringBuilder();
@@ -162,6 +179,15 @@ public class FileManipulator {
         FileWriter fileWriter = new FileWriter(this.file);
         fileWriter.append(tempList);
         fileWriter.close();
+    }
+
+    public boolean streamsAreInitialized() {
+        if(this.fileReader == null) {
+            return false;
+        }
+        else {
+            return true;
+        }
     }
 
     //@Return String currentDirectory. If user hasn't set up a directory, a default one will be loaded in the constructor
