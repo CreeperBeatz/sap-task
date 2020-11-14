@@ -16,6 +16,7 @@
         </constraints>
         <properties>
           <enabled value="true"/>
+          <font name="Segoe UI Light" size="14"/>
           <text value="Switch"/>
         </properties>
       </component>
@@ -27,6 +28,7 @@
         </constraints>
         <properties>
           <enabled value="true"/>
+          <font name="Segoe UI Light" size="14"/>
         </properties>
       </component>
       <component id="1d0b1" class="javax.swing.JTextField" binding="textField_word_switch_line2">
@@ -37,6 +39,7 @@
         </constraints>
         <properties>
           <enabled value="true"/>
+          <font name="Segoe UI Light" size="14"/>
         </properties>
       </component>
       <component id="d0345" class="javax.swing.JTextField" binding="textField_word_switch_line1">
@@ -47,6 +50,7 @@
         </constraints>
         <properties>
           <enabled value="true"/>
+          <font name="Segoe UI Light" size="14"/>
         </properties>
       </component>
       <component id="1d5bf" class="javax.swing.JTextField" binding="textField_word_switch_word1">
@@ -57,6 +61,7 @@
         </constraints>
         <properties>
           <enabled value="true"/>
+          <font name="Segoe UI Light" size="14"/>
         </properties>
       </component>
       <component id="4a67f" class="javax.swing.JLabel">
@@ -65,6 +70,7 @@
         </constraints>
         <properties>
           <enabled value="true"/>
+          <font name="Segoe UI Light" size="14"/>
           <text value="Switch 2 words"/>
         </properties>
       </component>
@@ -76,6 +82,7 @@
         </constraints>
         <properties>
           <enabled value="true"/>
+          <font name="Segoe UI Light" size="14"/>
         </properties>
       </component>
       <component id="4bd73" class="javax.swing.JTextField" binding="textField_line_switch_line2">
@@ -86,6 +93,7 @@
         </constraints>
         <properties>
           <enabled value="true"/>
+          <font name="Segoe UI Light" size="14"/>
         </properties>
       </component>
       <component id="1622a" class="javax.swing.JLabel">
@@ -94,6 +102,7 @@
         </constraints>
         <properties>
           <enabled value="true"/>
+          <font name="Segoe UI Light" size="14"/>
           <text value="Switch 2 lines"/>
         </properties>
       </component>
@@ -105,6 +114,7 @@
         </constraints>
         <properties>
           <enabled value="true"/>
+          <font name="Segoe UI Light" size="14"/>
         </properties>
       </component>
       <component id="f5cb2" class="javax.swing.JLabel">
@@ -113,6 +123,7 @@
         </constraints>
         <properties>
           <enabled value="true"/>
+          <font name="Segoe UI Light" size="14"/>
           <text value="Directory:"/>
         </properties>
       </component>
@@ -122,6 +133,7 @@
         </constraints>
         <properties>
           <enabled value="true"/>
+          <font name="Segoe UI Light" size="14"/>
           <text value="Set Directory"/>
         </properties>
       </component>
@@ -133,6 +145,7 @@
         </constraints>
         <properties>
           <editable value="false"/>
+          <font name="Segoe UI Light" size="16"/>
         </properties>
       </component>
     </children>

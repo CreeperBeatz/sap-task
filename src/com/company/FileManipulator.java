@@ -10,52 +10,55 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FileManipulator {
+
+    //Maximum chars that can be read with the buffered reader
+    final int READ_AHEAD_LIMIT = 1024;
+
     File file;//current file
 
-    //TODO replace with bufferedReader
-    Scanner fileScanner; //scan the file
+    BufferedReader fileReader; //Reader for the file
 
     String currentDirectory; //Always verified due to setDirectory() validation
-    //Scanner scanner; // read user input
 
-    SAP_GUI gui; //Needed in order for the logic display
+    public FileManipulator() throws IOException{
 
-    public FileManipulator(SAP_GUI gui) throws IOException{
-        this.gui = gui;
-
-        //final directory also stored in current directory
+        //load default directory
         this.currentDirectory = System.getProperty("user.dir");
         this.currentDirectory += "\\test.txt";
-
-        //Display the default directory on the GUI
-        gui.setTextField_directory(this.currentDirectory);
-
-
-
-        //this.fileWriter = new FileWriter(currentDirectory);
-
     }
 
-    public void loadFile(SAP_GUI gui) throws IOException{
+/*
+ * Sets file to open current directory
+ * Sets the scanner to this file
+ * If file doesn't exist, asks the user if they want to create it
+ * If yes, creates a new file at current directory
+ */
+    public void loadFile() throws IOException{
         this.file = new File(this.currentDirectory);
-        this.fileScanner = new Scanner(this.file, StandardCharsets.UTF_8.name());
 
         //if there isn't a txt file, ask user if he wants to create one
         if(!file.exists()) {
-            while(true) {
+            int userChoice = JOptionPane.showConfirmDialog(
+                    null,
+                    "Do you want to create a new file at that location?",
+                    "No file found!",
+                    JOptionPane.YES_NO_OPTION
+            );
 
+        System.out.println(userChoice);
+            //if yes, create one
+            if(userChoice == 0) { //if user wants to create file
+                file.createNewFile();
 
-                System.out.println("File not found. Do you want to create this file? (yes/no)");
-                //TODO get input from form
-
-                //if yes, create one
-                if(true) { //if user wants to create file
-                    file.createNewFile();
-                    System.out.println("New empty file created");
-                    break;
-                }
+            }
+            else {
+                return;
             }
         }
+
+        //After we are sure a file exists in this directory, we init the fileReader
+        this.fileReader = new BufferedReader(new FileReader(this.file));
+        this.fileReader.mark(READ_AHEAD_LIMIT);
     }
 
     //TODO Optimize switchLines()
@@ -75,12 +78,12 @@ public class FileManipulator {
 
         // Temporary storage of the file contents
         ArrayList<String> fileContents = new ArrayList<>();
-        //needed in order to use nextLine() method
-        fileScanner = resetFileScanner(fileScanner);
+        fileReader.reset();
 
+        String temp;
         //Write to the array, while there is content
-        while(fileScanner.hasNextLine()) {
-            fileContents.add(fileScanner.nextLine());
+        while((temp = fileReader.readLine()) != null) {
+            fileContents.add(temp);
         }
 
         //Validation if the line exists
@@ -101,11 +104,12 @@ public class FileManipulator {
         line2--;
 
         ArrayList<String> fileContent = new ArrayList<>();
-        fileScanner = resetFileScanner(fileScanner);
+        fileReader.reset();
 
-        //TODO replace with fileReader
-        while(fileScanner.hasNextLine()) {
-            fileContent.add(fileScanner.nextLine());
+        String temp;
+        //Write to the array, while there is content
+        while((temp = fileReader.readLine()) != null) {
+            fileContent.add(temp);
         }
 
         //Validation
@@ -146,12 +150,6 @@ public class FileManipulator {
     }
 
     //Will open a writer, write to the file and close the writer
-    private void writeToFile(String content) throws IOException{
-        FileWriter fileWriter = new FileWriter(this.file);
-        fileWriter.append(content);
-        fileWriter.close();
-    }
-
     private void writeToFile(ArrayList<String> listToPrint) throws IOException{
         StringBuilder tempList = new StringBuilder();
         for (String s : listToPrint) {
@@ -164,22 +162,32 @@ public class FileManipulator {
         fileWriter.close();
     }
 
+    //@Return String currentDirectory. If user hasn't set up a directory, a default one will be loaded in the constructor
+    public String getCurrentDirectory(){
+        return this.currentDirectory;
+    }
+
     //Will return TRUE, only if there is nothing in the file, if there are white spaces, will return FALSE
     public boolean isFileEmpty() {
         return (file.length() == 0);
     }
 
-    public void closeFile(){
-        fileScanner.close();
+    public void closeFile() throws IOException{
+        fileReader.close();
     }
 
-    public void printByLine() throws IOException{
-        fileScanner = resetFileScanner(fileScanner);
-        System.out.println("-----------------------------------");
-        while(fileScanner.hasNextLine()) {
-            System.out.println(fileScanner.nextLine());
+    public String getFileText() throws IOException{
+        fileReader.reset();
+        StringBuilder finalText = new StringBuilder();
+
+        String temp;
+
+        while((temp = fileReader.readLine()) != null) {
+            finalText.append(temp);
+            finalText.append('\n');
         }
-        System.out.println("-----------------------------------");
+
+        return finalText.toString();
     }
 
     //TODO change oracles "feature" with something actually non brain dead

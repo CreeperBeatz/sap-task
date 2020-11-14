@@ -17,24 +17,19 @@ public class SAP_GUI extends JFrame{
 
         FileManipulator fileManipulator;
 
-        //Main cycle -> program goes back here when user wants a new file
-        while (true) {
-            try {
-                fileManipulator = new FileManipulator(gui);
-                //fileManipulator.printByLine();
-                JOptionPane.showMessageDialog(null,"Do you want to create a file at that location?","No txt file found!", JOptionPane.YES_NO_OPTION);
-                //fileManipulator.switchLines(1,3);
-                //fileManipulator.printByLine();
-                //fileManipulator.switchWords(1 , 3 , 2 , 4);
-                //fileManipulator.printByLine();
-                break;
-            } catch (IOException e) {
-                System.out.println("Please provide a valid Directory!");
-                //e.printStackTrace();
-            }
-            //TODO rewrite this exception in the inner cycle
-            //TODO write a good method to close file, since currently, if an exception is trown closefile isnt executed
+        try {
+            fileManipulator = new FileManipulator();
+            gui.setTextField_directory(fileManipulator.getCurrentDirectory());
+            fileManipulator.loadFile();
+            gui.setPrintTextArea(fileManipulator.getFileText());
+            fileManipulator.switchWords(1, 2, 3, 4);
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+        //TODO rewrite this exception in the inner cycle
+        //TODO write a good method to close file, since currently, if an exception is thrown closefile isnt executed
     }
 
     private JButton switchButton;
@@ -65,11 +60,9 @@ public class SAP_GUI extends JFrame{
         setDirectoryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //If file already opened
-                //  check if new directory is valid (regex)
-                //      close old object
-                //      return to constructor
-                //
+                //try {
+
+                //}
             }
         });
     }
