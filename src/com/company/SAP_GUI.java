@@ -3,22 +3,21 @@ package com.company;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
 
 public class SAP_GUI extends JFrame{
 
     public static void main(String[] args) throws ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
-
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-
-        SAP_GUI gui = new SAP_GUI();
-        gui.setVisible(true);
-
+        SAP_GUI gui;
         FileManipulator fileManipulator;
 
         try {
             fileManipulator = new FileManipulator();
+            gui = new SAP_GUI(fileManipulator);
+            gui.setVisible(true);
             gui.setTextField_directory(fileManipulator.getCurrentDirectory());
             fileManipulator.loadFile();
             gui.setPrintTextArea(fileManipulator.getFileText());
@@ -28,7 +27,6 @@ public class SAP_GUI extends JFrame{
             e.printStackTrace();
         }
 
-        //TODO rewrite this exception in the inner cycle
         //TODO write a good method to close file, since currently, if an exception is thrown closefile isnt executed
     }
 
@@ -43,8 +41,11 @@ public class SAP_GUI extends JFrame{
     private JPanel rootPanel;
     private JTextField textField_directory;
     private JButton setDirectoryButton;
+    private FileManipulator fileManipulator;
 
-    public SAP_GUI(){
+    public SAP_GUI(FileManipulator fileManipulator){
+        this.fileManipulator = fileManipulator;
+
         add(rootPanel);
         setTitle("SAP text editor - alpha 0.1");
         setSize(700,400);
@@ -60,11 +61,26 @@ public class SAP_GUI extends JFrame{
         setDirectoryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //try {
+                if(fileManipulator.setDirectory(textField_directory.getText())) {
+                    try {
+                        fileManipulator.loadFile();
+                        printTextArea.setText(fileManipulator.getFileText());
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
 
-                //}
+                }
             }
         });
+    }
+
+    //Closes the Streams in fileManipulator
+    public static void endOperation(FileManipulator fileManipulator) {
+        try {
+            fileManipulator.closeFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     //Getters and setters

@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public class FileManipulator {
 
     //Maximum chars that can be read with the buffered reader
-    final int READ_AHEAD_LIMIT = 1024;
+    final int READ_AHEAD_LIMIT = 2048;
 
     File file;//current file
 
@@ -28,10 +28,10 @@ public class FileManipulator {
     }
 
 /*
- * Sets file to open current directory
- * Sets the scanner to this file
+ * initializes file to open current directory
  * If file doesn't exist, asks the user if they want to create it
  * If yes, creates a new file at current directory
+ * initializes the fileReader to this file and marks the beginning
  */
     public void loadFile() throws IOException{
         this.file = new File(this.currentDirectory);
@@ -45,11 +45,14 @@ public class FileManipulator {
                     JOptionPane.YES_NO_OPTION
             );
 
-        System.out.println(userChoice);
             //if yes, create one
             if(userChoice == 0) { //if user wants to create file
-                file.createNewFile();
-
+                if(file.createNewFile()) {
+                    //TODO statement that file was succesfully created
+                }
+                else {
+                    //TODO Statement that file couldnt be created
+                }
             }
             else {
                 return;
@@ -61,7 +64,6 @@ public class FileManipulator {
         this.fileReader.mark(READ_AHEAD_LIMIT);
     }
 
-    //TODO Optimize switchLines()
     //Currently, a bit unoptimized
     public void switchLines(int line1, int line2) throws ArrayIndexOutOfBoundsException, IOException {
 
@@ -190,15 +192,51 @@ public class FileManipulator {
         return finalText.toString();
     }
 
-    //TODO change oracles "feature" with something actually non brain dead
-    //Shitty way to reset the scanner nextLine to the first line. Change in the future
-    private Scanner resetFileScanner(Scanner oldScanner) throws IOException{ //throws IOException if scanner cant close properly
-        oldScanner.close();
-        return new Scanner(this.file, StandardCharsets.UTF_8.name());
+    /**
+     * reads a line from an INITIALIZED FILE and adds the number of chars to a integer counter
+     * finally, closes the reader
+     * @return number of chars in the file
+     * @throws FileNotFoundException if there is no file initialized
+     * @throws IOException if Buffered reader couldn't be closed properly
+     */
+    private int getCharCount() throws FileNotFoundException, IOException{
+        BufferedReader tempReader = new BufferedReader(new FileReader(this.file));
+        int charCount = 0;
+        String data;
+        while((data = tempReader.readLine())!= null) {
+            charCount += data.length();
+        }
+        tempReader.close();
+        return charCount;
     }
 
-    //Can only be called on initialized FileManipulator
-    private void setDirectory() {
+    /**
+     * Checks if userInput in true to the reg expr.
+     * @return true if directory is set correctly, false if not set
+     */
+    public boolean setDirectory(String userInput) {
+
+        //used to see if directory ends with txt
+        final String REGEX = ".*\\.txt$";
+
+        if(Pattern.matches(REGEX, userInput)) {
+            this.currentDirectory = userInput;
+            return true;
+        }
+        else {
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Directory doesn't end in .txt!\nPlease type in a valid directory!",
+                    "Directory error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return false;
+        }
+
+    }
+
+    //Gets and validates user input for directory
+    public void setDirectoryByConsole() {
 
         //Used for getting directory and confirming it
         String userInput = "null";

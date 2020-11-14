@@ -29,6 +29,7 @@
         <properties>
           <enabled value="true"/>
           <font name="Segoe UI Light" size="14"/>
+          <toolTipText value="Line 2 word index"/>
         </properties>
       </component>
       <component id="1d0b1" class="javax.swing.JTextField" binding="textField_word_switch_line2">
@@ -40,6 +41,7 @@
         <properties>
           <enabled value="true"/>
           <font name="Segoe UI Light" size="14"/>
+          <toolTipText value="Line 2"/>
         </properties>
       </component>
       <component id="d0345" class="javax.swing.JTextField" binding="textField_word_switch_line1">
@@ -51,6 +53,7 @@
         <properties>
           <enabled value="true"/>
           <font name="Segoe UI Light" size="14"/>
+          <toolTipText value="Line 1"/>
         </properties>
       </component>
       <component id="1d5bf" class="javax.swing.JTextField" binding="textField_word_switch_word1">
@@ -62,6 +65,7 @@
         <properties>
           <enabled value="true"/>
           <font name="Segoe UI Light" size="14"/>
+          <toolTipText value="Line 1 word index"/>
         </properties>
       </component>
       <component id="4a67f" class="javax.swing.JLabel">
@@ -83,6 +87,7 @@
         <properties>
           <enabled value="true"/>
           <font name="Segoe UI Light" size="14"/>
+          <toolTipText value="Line 1"/>
         </properties>
       </component>
       <component id="4bd73" class="javax.swing.JTextField" binding="textField_line_switch_line2">
@@ -94,6 +99,7 @@
         <properties>
           <enabled value="true"/>
           <font name="Segoe UI Light" size="14"/>
+          <toolTipText value="Line 2"/>
         </properties>
       </component>
       <component id="1622a" class="javax.swing.JLabel">
