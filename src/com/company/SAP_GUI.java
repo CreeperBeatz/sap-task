@@ -24,7 +24,6 @@ public class SAP_GUI extends JFrame{
             gui.setTextField_directory(fileManipulator.getCurrentDirectory());
             fileManipulator.loadFile();
             gui.setPrintTextArea(fileManipulator.getFileText());
-            fileManipulator.switchWords(1, 2, 3, 4);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -55,7 +54,7 @@ public class SAP_GUI extends JFrame{
 
         //Setting up closing algorithm to make sure all Streams are closed
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        setClosingAlgorithm(this);
+        setClosingAlgorithm(this, fileManipulator);
 
         switchButton.addActionListener(new ActionListener() {
             @Override
@@ -126,6 +125,12 @@ public class SAP_GUI extends JFrame{
                         printTextArea.setText(fileManipulator.getFileText());
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Couldn't save changes to the file",
+                                "Saving error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
                     }
 
                 }
@@ -137,11 +142,16 @@ public class SAP_GUI extends JFrame{
      * this was made, because in main, I don't have access to sap.gui(this) inside windowClosing event
      * @param gui gets a SAP_GUI
      */
-    private void setClosingAlgorithm(SAP_GUI gui) {
+    private void setClosingAlgorithm(SAP_GUI gui, FileManipulator fileManipulator) {
         gui.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                endOperation(fileManipulator);
+                try {
+                    fileManipulator.saveChangesToFile();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+
+                }
                 gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             }
         });
@@ -260,17 +270,6 @@ public class SAP_GUI extends JFrame{
             }
         }
         return true;
-    }
-
-    //Closes the Streams in fileManipulator
-    public static void endOperation(FileManipulator fileManipulator) {
-        if(fileManipulator.streamsAreInitialized()) {
-            try {
-                fileManipulator.closeFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     //Getters and setters

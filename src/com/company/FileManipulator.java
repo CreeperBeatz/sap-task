@@ -11,9 +11,7 @@ import java.util.regex.Pattern;
 
 public class FileManipulator {
 
-    final int READ_AHEAD_LIMIT = 2048;//Maximum chars that can be read with the buffered reader
     File file;//current file
-    //BufferedReader fileReader; //Reader for the file
     String currentDirectory; //Always verified due to setDirectory() validation
     ArrayList<String> fileContent; //File content stored here, manipulated here, until
 
@@ -55,17 +53,16 @@ public class FileManipulator {
             }
         }
 
-        /*
-        //After we are sure a file exists in this directory, we init the fileReader
-        if(this.fileReader != null) {
-            this.fileReader.close();
-        }
-        this.fileReader = new BufferedReader(new FileReader(this.file));
-        this.fileReader.mark(READ_AHEAD_LIMIT);
-         */
+        updateFileContentsArray();
     }
 
-    //Currently, a bit unoptimized
+    /**
+     *
+     * @param line1
+     * @param line2
+     * @throws ArrayIndexOutOfBoundsException
+     * @throws IOException
+     */
     public void switchLines(int line1, int line2) throws ArrayIndexOutOfBoundsException, IOException {
 
         //Making the input synchronized with the array lines
@@ -83,41 +80,28 @@ public class FileManipulator {
             throw new ArrayIndexOutOfBoundsException("Line num lower than 1!");
         }
 
-        // Temporary storage of the file contents
-        ArrayList<String> fileContents = new ArrayList<>();
-        fileReader.reset();
-
-        String temp;
-        //Write to the array, while there is content
-        while((temp = fileReader.readLine()) != null) {
-            fileContents.add(temp);
-        }
-
         //Validation if the line exists
-        if(fileContents.size() < line2) {
+        if(fileContent.size() < line2) {
             throw new ArrayIndexOutOfBoundsException("Line doesn't exist!");
         }
 
         //Swapping the lines
-        Collections.swap(fileContents, line1, line2);
-
-        //Writing to the file
-        writeToFile(fileContents);
+        Collections.swap(fileContent, line1, line2);
     }
 
+    /**
+     *
+     * @param line1
+     * @param line1Position
+     * @param line2
+     * @param line2Position
+     * @throws ArrayIndexOutOfBoundsException
+     * @throws IOException
+     */
     public void switchWords(int line1, int line1Position, int line2, int line2Position) throws ArrayIndexOutOfBoundsException, IOException{
         //So arrays are synchronized
         line1--;
         line2--;
-
-        ArrayList<String> fileContent = new ArrayList<>();
-        fileReader.reset();
-
-        String temp;
-        //Write to the array, while there is content
-        while((temp = fileReader.readLine()) != null) {
-            fileContent.add(temp);
-        }
 
         //Validation
         if(fileContent.size() <= line2) { throw new ArrayIndexOutOfBoundsException("File doesn't have needed  lines!");}
@@ -136,8 +120,6 @@ public class FileManipulator {
         fileContent.set(line2, (fileContent.get(line2).substring(0, word2IndexArray[0]) //beginning of the line up until word2
                 + word1String //placing word1 in the place of word2
                 + fileContent.get(line2).substring(word2IndexArray[1]))); //placing the other part of the line
-
-        writeToFile(fileContent);
     }
 
     private int[] getTokenStartEndIndex(String testedString, int wordPosition) throws ArrayIndexOutOfBoundsException{
@@ -162,16 +144,16 @@ public class FileManipulator {
         this.fileContent = new ArrayList<>();
         String temp;
         while((temp = fileReader.readLine()) !=null ) {
-            this.fileContent.add(temp + '\n');
+            this.fileContent.add(temp);
         }
 
         fileReader.close();
     }
 
     //Will open a writer, write to the file and close the writer
-    private void writeToFile(ArrayList<String> listToPrint) throws IOException{
+    public void saveChangesToFile() throws IOException{
         StringBuilder tempList = new StringBuilder();
-        for (String s : listToPrint) {
+        for (String s : fileContent) {
             tempList.append(s);
             tempList.append('\n');
         }
@@ -181,16 +163,9 @@ public class FileManipulator {
         fileWriter.close();
     }
 
-    public boolean streamsAreInitialized() {
-        if(this.fileReader == null) {
-            return false;
-        }
-        else {
-            return true;
-        }
-    }
-
-    //@Return String currentDirectory. If user hasn't set up a directory, a default one will be loaded in the constructor
+    /**
+     * @return String currentDirectory. If user hasn't set up a directory, a default one will be loaded in the constructor
+     */
     public String getCurrentDirectory(){
         return this.currentDirectory;
     }
@@ -200,18 +175,16 @@ public class FileManipulator {
         return (file.length() == 0);
     }
 
-    public void closeFile() throws IOException{
-        fileReader.close();
-    }
-
+    /**
+     * Will NOT read from file!
+     * @return arraylist fileContents in the form of a String
+     * @throws IOException
+     */
     public String getFileText() throws IOException{
-        fileReader.reset();
         StringBuilder finalText = new StringBuilder();
 
-        String temp;
-
-        while((temp = fileReader.readLine()) != null) {
-            finalText.append(temp);
+        for(int currentLine = 0; currentLine < fileContent.size(); currentLine++) {
+            finalText.append(fileContent.get(currentLine));
             finalText.append('\n');
         }
 
@@ -237,7 +210,7 @@ public class FileManipulator {
     }
 
     /**
-     * Checks if userInput in true to the reg expr.
+     * Checks if userInput is true to the reg expr.
      * @return true if directory is set correctly, false if not set
      */
     public boolean setDirectory(String userInput) {
