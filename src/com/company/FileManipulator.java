@@ -55,6 +55,9 @@ public class FileManipulator {
                     if(userChoice2 == 0) {
                         fillArrayListWithTestData();
                     }
+                    else {
+                        updateFileContentsArray();
+                    }
                 }
                 else {
                     JOptionPane.showMessageDialog(
