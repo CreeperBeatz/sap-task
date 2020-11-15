@@ -2,10 +2,8 @@ package com.company;
 
 import javax.swing.*;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,18 +13,22 @@ public class FileManipulator {
     String currentDirectory; //Always verified due to setDirectory() validation
     ArrayList<String> fileContent; //File content stored here, manipulated here, until
 
+    /**
+     * Constructor. Only sets the currentDirectory to the default one, so we could instantly display it
+     */
     public FileManipulator(){
         //load default directory
         this.currentDirectory = System.getProperty("user.dir");
         this.currentDirectory += "\\test.txt";
     }
 
-/*
- * initializes file to open current directory
- * If file doesn't exist, asks the user if they want to create it
- * If yes, creates a new file at current directory
- * initializes the fileReader to this file and marks the beginning
- */
+    /**
+     * initializes file to open current directory
+     * If file doesn't exist, asks the user if they want to create it
+     * If yes, creates a new file at current directory
+     * initializes the fileReader to this file and marks the beginning
+     * @throws IOException if fileContents ArrayList couldnt be updated properly
+     */
     public void loadFile() throws IOException{
         this.file = new File(this.currentDirectory);
 
@@ -42,28 +44,63 @@ public class FileManipulator {
             //if yes, create one
             if(userChoice == 0) { //if user wants to create file
                 if(file.createNewFile()) {
-                    //TODO statement that file was succesfully created
+                    //asking if the user wants to fill the file with some data
+                    int userChoice2 = JOptionPane.showConfirmDialog(
+                            null,
+                            "Do you want to fill the file with Test Data?",
+                            "File is empty",
+                            JOptionPane.YES_NO_OPTION
+                    );
+                    //if yes, call fillFileWithTestData()
+                    if(userChoice2 == 0) {
+                        fillArrayListWithTestData();
+                    }
                 }
                 else {
-                    //TODO Statement that file couldnt be created
+                    JOptionPane.showMessageDialog(
+                            null ,
+                            "Couldn't create a new file" ,
+                            "Saving error" ,
+                            JOptionPane.ERROR_MESSAGE
+                    );
                 }
             }
             else {
                 return;
             }
         }
-
-        updateFileContentsArray();
+        else { //If file already exists, read the data from it
+            updateFileContentsArray();
+        }
     }
 
     /**
-     *
-     * @param line1
-     * @param line2
-     * @throws ArrayIndexOutOfBoundsException
-     * @throws IOException
+     * Fills the arrayList with consequence of (word1 word2 word3 ...) for 5 lines, each with 5 words
      */
-    public void switchLines(int line1, int line2) throws ArrayIndexOutOfBoundsException, IOException {
+    private void fillArrayListWithTestData() {
+        final int numberOfLines = 5;
+        this.fileContent = new ArrayList<>();
+
+        int currentWord = 1;
+
+        for(int currentLine = 0; currentLine < numberOfLines; currentLine++) {
+            this.fileContent.add("word" + currentWord + " "
+                    + "word" + (currentWord+1) + " "
+                    + "word" + (currentWord+2) + " "
+                    + "word" + (currentWord+3) + " "
+                    + "word" + (currentWord+4) + " ");
+            currentWord += 5;
+        }
+
+    }
+
+    /**
+     * Swaps the position of 2 lines in the fileContents ArrayList
+     * @param line1 integer of the line that will be swapped
+     * @param line2 integer of the line that will be swapped
+     * @throws ArrayIndexOutOfBoundsException if line doesn't exist in the file or is below 0
+     */
+    public void switchLines(int line1, int line2) throws ArrayIndexOutOfBoundsException {
 
         //Making the input synchronized with the array lines
         line1--;
@@ -90,15 +127,14 @@ public class FileManipulator {
     }
 
     /**
-     *
-     * @param line1
-     * @param line1Position
-     * @param line2
-     * @param line2Position
-     * @throws ArrayIndexOutOfBoundsException
-     * @throws IOException
+     * With given 2 line numbers and word indexes, swaps the places of the words in fileContent ArrayList
+     * @param line1 integer indicating line number
+     * @param line1Position Position of the word in the line
+     * @param line2 integer indicating line number
+     * @param line2Position Position of the word in the line
+     * @throws ArrayIndexOutOfBoundsException if line/word doesn't exist or is below 0
      */
-    public void switchWords(int line1, int line1Position, int line2, int line2Position) throws ArrayIndexOutOfBoundsException, IOException{
+    public void switchWords(int line1, int line1Position, int line2, int line2Position) throws ArrayIndexOutOfBoundsException{
         //So arrays are synchronized
         line1--;
         line2--;
@@ -122,11 +158,18 @@ public class FileManipulator {
                 + fileContent.get(line2).substring(word2IndexArray[1]))); //placing the other part of the line
     }
 
+    /**
+     * Using regex, search through the string for a word with a given index
+     * @param testedString Given string that will be tested
+     * @param wordPosition Position searched in the String line
+     * @return Integer array, containing 2 values, [0] = start position, [1] = end position + 1
+     * @throws ArrayIndexOutOfBoundsException
+     */
     private int[] getTokenStartEndIndex(String testedString, int wordPosition) throws ArrayIndexOutOfBoundsException{
         Pattern pattern = Pattern.compile("\\w+");
         Matcher matcher = pattern.matcher(testedString);
 
-        //re-rolling the matcher.find method until we find the needed positionIndex
+        //re-calling the matcher.find method until we find the needed positionIndex
         for(int currentPosition = 1; currentPosition <= wordPosition; currentPosition++) {
             if(!matcher.find()) {
                 throw new ArrayIndexOutOfBoundsException("Word out of bounds!");
@@ -135,9 +178,14 @@ public class FileManipulator {
                 return new int[] {matcher.start(), matcher.end()};
             }
         }
-        return null; //keeping this, because compiler isn't happy about not having a return statement. It's unreachable pratically
+        return null; //keeping this, because compiler isn't happy about not having a return statement. It's unreachable practically
     }
 
+    /**
+     * Opens a buffered reader, creates a new ArrayList where values read from the reader are stored
+     * Closes the buffered reader.
+     * @throws IOException If buffered reader couldn't be loaded or closed properly
+     */
     private void updateFileContentsArray() throws IOException {
         BufferedReader fileReader = new BufferedReader(new FileReader(this.file));
 
@@ -150,7 +198,12 @@ public class FileManipulator {
         fileReader.close();
     }
 
-    //Will open a writer, write to the file and close the writer
+    /**
+     * Writes the content of ArrayList on a StringBuilder
+     * Opens a FileWriter and writes the StringBuilder
+     * Closes the FileWriter
+     * @throws IOException If FileWriter couldn't open properly(invalid file), or couldn't close properly
+     */
     public void saveChangesToFile() throws IOException{
         StringBuilder tempList = new StringBuilder();
         for (String s : fileContent) {
@@ -170,17 +223,11 @@ public class FileManipulator {
         return this.currentDirectory;
     }
 
-    //Will return TRUE, only if there is nothing in the file, if there are white spaces, will return FALSE
-    public boolean isFileEmpty() {
-        return (file.length() == 0);
-    }
-
     /**
      * Will NOT read from file!
      * @return arraylist fileContents in the form of a String
-     * @throws IOException
      */
-    public String getFileText() throws IOException{
+    public String getFileText(){
         StringBuilder finalText = new StringBuilder();
 
         for(int currentLine = 0; currentLine < fileContent.size(); currentLine++) {
@@ -196,7 +243,7 @@ public class FileManipulator {
      * finally, closes the reader
      * @return number of chars in the file
      * @throws FileNotFoundException if there is no file initialized
-     * @throws IOException if Buffered reader couldn't be closed properly
+     * @throws IOException if Buffered reader couldn't be opened/closed properly
      */
     private int getCharCount() throws FileNotFoundException, IOException{
         BufferedReader tempReader = new BufferedReader(new FileReader(this.file));
@@ -210,7 +257,7 @@ public class FileManipulator {
     }
 
     /**
-     * Checks if userInput is true to the reg expr.
+     * Checks if userInput is true to the reg expr -> ends in .txt
      * @return true if directory is set correctly, false if not set
      */
     public boolean setDirectory(String userInput) {
@@ -231,10 +278,19 @@ public class FileManipulator {
             );
             return false;
         }
-
     }
 
-    //Gets and validates user input for directory
+    /**
+     * Used to see whether there is an initialized file in the system
+     * @return file if there is a file, null if there is no file
+     */
+    public File getFile() {
+        return this.file;
+    }
+
+    /**
+     * If using a console, contains every validation needed to set a valid directory
+     */
     public void setDirectoryByConsole() {
 
         //Used for getting directory and confirming it

@@ -12,7 +12,17 @@ import java.util.regex.Pattern;
 
 public class SAP_GUI extends JFrame{
 
+    /**
+     * Main method. Initializes and configures the GUI and FileManipulator.
+     * All other events are based on ActionListeners
+     * @param args Default args
+     * @throws ClassNotFoundException UIManager can't find System look and feel class
+     * @throws UnsupportedLookAndFeelException Can't apply System look and feel to the java GUI
+     * @throws InstantiationException Can't
+     * @throws IllegalAccessException Can't access System look and feel class
+     */
     public static void main(String[] args) throws ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
+
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         SAP_GUI gui;
         FileManipulator fileManipulator;
@@ -21,15 +31,13 @@ public class SAP_GUI extends JFrame{
             fileManipulator = new FileManipulator();
             gui = new SAP_GUI(fileManipulator);
             gui.setVisible(true);
-            gui.setTextField_directory(fileManipulator.getCurrentDirectory());
-            fileManipulator.loadFile();
-            gui.setPrintTextArea(fileManipulator.getFileText());
+            gui.setTextField_directory(fileManipulator.getCurrentDirectory()); //Setting the default directory to be displayed
+            fileManipulator.loadFile(); //loading the default txt
+            gui.setPrintTextArea(fileManipulator.getFileText()); //Printing the file text to the Text box in the GUI
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        //TODO write a good method to close file, since currently, if an exception is thrown closefile isnt executed
     }
 
     private JButton switchButton;
@@ -45,11 +53,17 @@ public class SAP_GUI extends JFrame{
     private JButton setDirectoryButton;
     private FileManipulator fileManipulator;
 
+    /**
+     * Constructor, initializes the GUI
+     * Sets up the action listeners
+     * Sets up closing operation
+     * @param fileManipulator
+     */
     public SAP_GUI(FileManipulator fileManipulator){
         this.fileManipulator = fileManipulator;
 
         add(rootPanel);
-        setTitle("SAP text editor - alpha 0.1");
+        setTitle("SAP text editor - 1.0");
         setSize(700,400);
 
         //Setting up closing algorithm to make sure all Streams are closed
@@ -59,78 +73,84 @@ public class SAP_GUI extends JFrame{
         switchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    if (validateFields()) { //returns true if fields are valid
-                        switch (checkFieldStatus()) {
-                            case 0:
-                                fileManipulator.switchLines(
-                                        Integer.parseInt(textField_line_switch_line1.getText()),
-                                        Integer.parseInt(textField_line_switch_line2.getText())
-                                );
-                                break;
-                            case 1:
-                                fileManipulator.switchWords(
-                                        Integer.parseInt(textField_word_switch_line1.getText()),
-                                        Integer.parseInt(textField_word_switch_word1.getText()),
-                                        Integer.parseInt(textField_word_switch_line2.getText()),
-                                        Integer.parseInt(textField_word_switch_word2.getText())
-                                );
-                                break;
-                            case 2:
-                                JOptionPane.showMessageDialog(
-                                        null,
-                                        "Firstly, switchLines will be executed\nthen switchWords.",
-                                        "Input for both methods detected!",
-                                        JOptionPane.INFORMATION_MESSAGE
-                                );
-
-                                fileManipulator.switchLines(
-                                        Integer.parseInt(textField_line_switch_line1.getText()),
-                                        Integer.parseInt(textField_line_switch_line2.getText())
-                                );
-
-                                fileManipulator.switchWords(
-                                        Integer.parseInt(textField_word_switch_line1.getText()),
-                                        Integer.parseInt(textField_word_switch_word1.getText()),
-                                        Integer.parseInt(textField_word_switch_line2.getText()),
-                                        Integer.parseInt(textField_word_switch_word2.getText())
-                                );
-
-                                break;
-                            default:
-                                JOptionPane.showMessageDialog(
-                                        null,
-                                        "Please enter full information for the method/methods",
-                                        "Input error",
-                                        JOptionPane.ERROR_MESSAGE
-                                );
-                                break;
-                        }
-                        //updating the text in the end of the method
-                        printTextArea.setText(fileManipulator.getFileText());
-
+                if (validateFields()) { //returns true if fields are valid (with integers)
+                    switch (checkFieldStatus()) { //returns an int depending on the case
+                        case 0:
+                            //User Input ONLY on SwitchLines
+                            fileManipulator.switchLines(
+                                    Integer.parseInt(textField_line_switch_line1.getText()),
+                                    Integer.parseInt(textField_line_switch_line2.getText())
+                            );
+                            break;
+                        case 1:
+                            //User Input ONLY on SwitchWords
+                            fileManipulator.switchWords(
+                                    Integer.parseInt(textField_word_switch_line1.getText()),
+                                    Integer.parseInt(textField_word_switch_word1.getText()),
+                                    Integer.parseInt(textField_word_switch_line2.getText()),
+                                    Integer.parseInt(textField_word_switch_word2.getText())
+                            );
+                            break;
+                        case 2:
+                            //User Input on BOTH SwitchWords and SwitchLines
+                            JOptionPane.showMessageDialog(
+                                    null,
+                                    "Firstly, switchLines will be executed\nthen switchWords.",
+                                    "Input for both methods detected!",
+                                    JOptionPane.INFORMATION_MESSAGE
+                            );
+                            //Switching the lines
+                            fileManipulator.switchLines(
+                                    Integer.parseInt(textField_line_switch_line1.getText()),
+                                    Integer.parseInt(textField_line_switch_line2.getText())
+                            );
+                            //Switching the words
+                            fileManipulator.switchWords(
+                                    Integer.parseInt(textField_word_switch_line1.getText()),
+                                    Integer.parseInt(textField_word_switch_word1.getText()),
+                                    Integer.parseInt(textField_word_switch_line2.getText()),
+                                    Integer.parseInt(textField_word_switch_word2.getText())
+                            );
+                            break;
+                        default: // case 3: no full information
+                            JOptionPane.showMessageDialog(
+                                    null,
+                                    "Please enter full information for the method/methods",
+                                    "Input error",
+                                    JOptionPane.ERROR_MESSAGE
+                            );
+                            break;
                     }
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                    //updating the text in the end of the method
+                    printTextArea.setText(fileManipulator.getFileText());
                 }
+
             }
         });
 
         setDirectoryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if(fileManipulator.getFile().exists()) {
+                    try {
+                        fileManipulator.saveChangesToFile();
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                        JOptionPane.showMessageDialog(
+                                null ,
+                                "Couldn't save changes to the file" ,
+                                "Saving error" ,
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                    }
+                }
+                //setDirectory tests if the input is valid and returns True/False
                 if(fileManipulator.setDirectory(textField_directory.getText())) {
                     try {
                         fileManipulator.loadFile();
                         printTextArea.setText(fileManipulator.getFileText());
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
-                        JOptionPane.showMessageDialog(
-                                null,
-                                "Couldn't save changes to the file",
-                                "Saving error",
-                                JOptionPane.ERROR_MESSAGE
-                        );
                     }
 
                 }
@@ -146,11 +166,18 @@ public class SAP_GUI extends JFrame{
         gui.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                try {
-                    fileManipulator.saveChangesToFile();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-
+                if(fileManipulator.getFile().exists()) {
+                    try {
+                        fileManipulator.saveChangesToFile();
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                        JOptionPane.showMessageDialog(
+                                null ,
+                                "Couldn't save changes to the file" ,
+                                "Saving error" ,
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                    }
                 }
                 gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             }
