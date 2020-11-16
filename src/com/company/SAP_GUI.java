@@ -36,7 +36,7 @@ public class SAP_GUI extends JFrame{
         }
     }
 
-    private JButton switchButton;
+    private JButton switchWordsButton;
     private JTextArea printTextArea;
     private JTextField textField_word_switch_line2;
     private JTextField textField_word_switch_word2;
@@ -47,6 +47,8 @@ public class SAP_GUI extends JFrame{
     private JPanel rootPanel;
     private JTextField textField_directory;
     private JButton setDirectoryButton;
+    private JButton clearFieldsButton;
+    private JButton switchLinesButton;
 
     /**
      * Constructor, initializes the GUI
@@ -64,61 +66,43 @@ public class SAP_GUI extends JFrame{
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setClosingAlgorithm(this, fileManipulator);
 
-        switchButton.addActionListener(e -> {
+        /*
+          Logic of the Switch words button.
+          Validates the fields via the validateFields(checks for integers),
+          then with checkFieldStatus to see whether it's full information
+          if yes, pass that information to the fileManipulator
+         */
+        switchWordsButton.addActionListener(e -> {
             if (validateFields()) { //returns true if fields are valid (with integers)
-                switch (checkFieldStatus()) { //returns an int depending on the case
-                    case 0:
-                        //User Input ONLY on SwitchLines
-                        fileManipulator.switchLines(
-                                Integer.parseInt(textField_line_switch_line1.getText()),
-                                Integer.parseInt(textField_line_switch_line2.getText())
-                        );
-                        break;
-                    case 1:
-                        //User Input ONLY on SwitchWords
-                        fileManipulator.switchWords(
-                                Integer.parseInt(textField_word_switch_line1.getText()),
-                                Integer.parseInt(textField_word_switch_word1.getText()),
-                                Integer.parseInt(textField_word_switch_line2.getText()),
-                                Integer.parseInt(textField_word_switch_word2.getText())
-                        );
-                        break;
-                    case 2:
-                        //User Input on BOTH SwitchWords and SwitchLines
-                        JOptionPane.showMessageDialog(
-                                null,
-                                "Firstly, switchLines will be executed\nthen switchWords.",
-                                "Input for both methods detected!",
-                                JOptionPane.INFORMATION_MESSAGE
-                        );
-                        //Switching the lines
-                        fileManipulator.switchLines(
-                                Integer.parseInt(textField_line_switch_line1.getText()),
-                                Integer.parseInt(textField_line_switch_line2.getText())
-                        );
-                        //Switching the words
-                        fileManipulator.switchWords(
-                                Integer.parseInt(textField_word_switch_line1.getText()),
-                                Integer.parseInt(textField_word_switch_word1.getText()),
-                                Integer.parseInt(textField_word_switch_line2.getText()),
-                                Integer.parseInt(textField_word_switch_word2.getText())
-                        );
-                        break;
-                    default: // case 3: no full information
-                        JOptionPane.showMessageDialog(
-                                null,
-                                "Please enter full information for the method/methods",
-                                "Input error",
-                                JOptionPane.ERROR_MESSAGE
-                        );
-                        break;
+                if (checkFieldStatus() == 1 || checkFieldStatus() == 2) { //returns an int depending on the case
+                    //Switching the words
+                    fileManipulator.switchWords(
+                            Integer.parseInt(textField_word_switch_line1.getText()) ,
+                            Integer.parseInt(textField_word_switch_word1.getText()) ,
+                            Integer.parseInt(textField_word_switch_line2.getText()) ,
+                            Integer.parseInt(textField_word_switch_word2.getText())
+                    );
+                    //updating the text in the end of the method
+                    printTextArea.setText(fileManipulator.getFileText());
+                } else { // case 3: no full information
+                    JOptionPane.showMessageDialog(
+                            null ,
+                            "Please enter full information for the method/methods" ,
+                            "Input error" ,
+                            JOptionPane.ERROR_MESSAGE
+                    );
                 }
-                //updating the text in the end of the method
-                printTextArea.setText(fileManipulator.getFileText());
             }
-
         });
 
+
+        /*
+          If the file exists, save the changes to it
+          then get the directory from user input text box and validate it
+          if valid, set it to this.directory and load the new file
+          loadFile method will ask the user if they want to create a file, in case it was missing
+          and if they want to fill it with test information
+         */
         setDirectoryButton.addActionListener(e -> {
             if(fileManipulator.getFile().exists()) {
                 try {
@@ -143,6 +127,45 @@ public class SAP_GUI extends JFrame{
                 }
 
             }
+        });
+
+
+        /*
+          Logic of the Switch lines button.
+          Validates the fields via the validateFields(checks for integers),
+          then with checkFieldStatus to see whether it's full information
+          if yes, pass that information to the fileManipulator
+         */
+        switchLinesButton.addActionListener(e -> {
+            if (validateFields()) { //returns true if fields are valid (with integers)
+                if (checkFieldStatus() == 0 || checkFieldStatus() == 2) {
+                    //Switching the lines
+                    fileManipulator.switchLines(
+                            Integer.parseInt(textField_line_switch_line1.getText()) ,
+                            Integer.parseInt(textField_line_switch_line2.getText())
+                    );
+                    //updating the text in the end of the method
+                    printTextArea.setText(fileManipulator.getFileText());
+                }
+                else {
+                    JOptionPane.showMessageDialog(
+                            null ,
+                            "Please enter full information for the method/methods" ,
+                            "Input error" ,
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        });
+
+        //Sets all the text boxes, except the directory one, to ""
+        clearFieldsButton.addActionListener(e -> {
+            textField_line_switch_line1.setText("");
+            textField_line_switch_line2.setText("");
+            textField_word_switch_line1.setText("");
+            textField_word_switch_line2.setText("");
+            textField_word_switch_word1.setText("");
+            textField_word_switch_word2.setText("");
         });
     }
 
