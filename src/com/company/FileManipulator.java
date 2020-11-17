@@ -27,7 +27,7 @@ public class FileManipulator {
      * If file doesn't exist, asks the user if they want to create it
      * If yes, creates a new file at current directory
      * initializes the fileReader to this file and marks the beginning
-     * @throws IOException if fileContents ArrayList couldnt be updated properly
+     * @throws IOException if fileContents ArrayList couldn't be updated properly
      */
     public void loadFile() throws IOException{
         this.file = new File(this.currentDirectory);
@@ -67,9 +67,6 @@ public class FileManipulator {
                             JOptionPane.ERROR_MESSAGE
                     );
                 }
-            }
-            else {
-                return;
             }
         }
         else { //If file already exists, read the data from it
@@ -146,12 +143,14 @@ public class FileManipulator {
         if(fileContent.size() <= line2) { throw new ArrayIndexOutOfBoundsException("File doesn't have needed  lines!");}
 
         // stores value for the beginning and end of the words for the selected string
-        int word1IndexArray[] = getTokenStartEndIndex(fileContent.get(line1), line1Position);
-        int word2IndexArray[] = getTokenStartEndIndex(fileContent.get(line2), line2Position);
+        int[] word1IndexArray = getTokenStartEndIndex(fileContent.get(line1), line1Position);
+        int[] word2IndexArray = getTokenStartEndIndex(fileContent.get(line2), line2Position);
 
         //Temp variable to store the word from line1 before we switch it with the word from line2
+        assert word1IndexArray != null;
         String word1String = fileContent.get(line1).substring(word1IndexArray[0], word1IndexArray[1]);
 
+        assert word2IndexArray != null;
         fileContent.set(line1, (fileContent.get(line1).substring(0, word1IndexArray[0]) //beginning of the line up until word1
                 + fileContent.get(line2).substring(word2IndexArray[0], word2IndexArray[1]) //placing word2 in the place of word1
                 + fileContent.get(line1).substring(word1IndexArray[1]))); //placing the other part of the line
@@ -166,7 +165,7 @@ public class FileManipulator {
      * @param testedString Given string that will be tested
      * @param wordPosition Position searched in the String line
      * @return Integer array, containing 2 values, [0] = start position, [1] = end position + 1
-     * @throws ArrayIndexOutOfBoundsException
+     * @throws ArrayIndexOutOfBoundsException if word position doesn't exist in the given String
      */
     private int[] getTokenStartEndIndex(String testedString, int wordPosition) throws ArrayIndexOutOfBoundsException{
         Pattern pattern = Pattern.compile("\\w+");
@@ -233,30 +232,12 @@ public class FileManipulator {
     public String getFileText(){
         StringBuilder finalText = new StringBuilder();
 
-        for(int currentLine = 0; currentLine < fileContent.size(); currentLine++) {
-            finalText.append(fileContent.get(currentLine));
+        for (String s : fileContent) {
+            finalText.append(s);
             finalText.append('\n');
         }
 
         return finalText.toString();
-    }
-
-    /**
-     * reads a line from an INITIALIZED FILE and adds the number of chars to a integer counter
-     * finally, closes the reader
-     * @return number of chars in the file
-     * @throws FileNotFoundException if there is no file initialized
-     * @throws IOException if Buffered reader couldn't be opened/closed properly
-     */
-    private int getCharCount() throws FileNotFoundException, IOException{
-        BufferedReader tempReader = new BufferedReader(new FileReader(this.file));
-        int charCount = 0;
-        String data;
-        while((data = tempReader.readLine())!= null) {
-            charCount += data.length();
-        }
-        tempReader.close();
-        return charCount;
     }
 
     /**
@@ -289,57 +270,6 @@ public class FileManipulator {
      */
     public File getFile() {
         return this.file;
-    }
-
-    /**
-     * If using a console, contains every validation needed to set a valid directory
-     */
-    public void setDirectoryByConsole() {
-
-        //Used for getting directory and confirming it
-        String userInput = "null";
-
-        //used when checking if file ends in txt in order to know whether to ask user if they want to change directory
-         boolean fileEndsInTxt = true;
-
-        //used to see if directory ends with txt
-        final String REGEX = ".*\\.txt$";
-
-        while(true) {
-
-            //if directory doesnt end with .txt, skip asking user if they want to change directory
-            if(fileEndsInTxt) {
-            System.out.println("Current directory: " + currentDirectory);
-            System.out.println("Is that right?");
-            System.out.println("(no) - change directory      (yes) - save current directory");
-            //userInput = scanner.nextLine();
-            }
-            else {
-                fileEndsInTxt = false; // we reset the value for the next iteration
-            }
-
-            //testing user input
-            if(userInput.equals("no")){
-                System.out.println("Please enter new directory: ");
-                //this.currentDirectory = scanner.nextLine();
-            }
-            else if(userInput.equals("yes")) {
-                //testing if string ends with .txt, else we kindly ask the user to change to .txt directory
-                if(Pattern.matches(REGEX, this.currentDirectory)) {
-                    System.out.println("Path set to: " + this.currentDirectory);
-                    return;
-                }
-                else {
-                    System.out.println("Please change the directory to a file ending in .txt");
-                    userInput = "no"; //we do this to go directly in mode for changing value
-                    fileEndsInTxt = false;
-                }
-            }
-            else {
-                System.out.println("Input not recognized");
-            }
-        }
-
     }
 
 }
